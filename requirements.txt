@@ -1,0 +1,10 @@
+uvicorn
+pydrantic
+requests
+gspread
+google-auth
+google-auth-oauthlib
+google-auth-httplib2
+feedparser
+beautifulsoup4
+google-generativeai
