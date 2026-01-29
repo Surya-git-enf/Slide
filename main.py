@@ -42,7 +42,7 @@ scope = [
 
 creds = Credentials.from_service_account_file("credentials.json", scopes=scope)
 client = gspread.authorize(creds)
-sheet = client.open_by_key("AIzaSyB5C0Ga8lbgIS42LpHhVbiciE4sZTp2QTs").sheet1
+sheet = client.open_by_key(SHEET_KEY).sheet1
 
 # ---------------- GEMINI ---------------- #
 api = os.getenv("GEMINI_API_KET")
