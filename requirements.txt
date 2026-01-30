@@ -8,3 +8,4 @@ google-auth-httplib2
 feedparser
 beautifulsoup4
 google-generativeai
+supabase
