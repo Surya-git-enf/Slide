@@ -8,16 +8,19 @@ from datetime import datetime
 from supabase import create_client
 import google.generativeai as genai
 from dotenv import load_dotenv
+from fastapi import Fastapi
+
 
 # ----------------------------------
 # Load environment variables
 # ----------------------------------
 load_dotenv()
+app = fastapi()
 
 SUPABASE_URL = os.getenv("SUPABASE_URL")
 SUPABASE_KEY = os.getenv("SUPABASE_KEY")
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
-
+GEMINI_MODEL = os.getenv("GEMINI_MODEL")
 # ----------------------------------
 # Supabase client
 # ----------------------------------
@@ -27,7 +30,7 @@ supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 # Gemini AI setup
 # ----------------------------------
 genai.configure(api_key=GEMINI_API_KEY)
-model = genai.GenerativeModel("gemini-pro")
+model = genai.GenerativeModel(GEMINI_MODEL)
 
 # ----------------------------------
 # RSS feed URLs (add more if you want)
@@ -40,29 +43,60 @@ RSS_URLS = [
 # AI PROMPT (STRICT JSON)
 # ----------------------------------
 PROMPT_TEMPLATE = """
-You are a professional news writer.
+You are a professional news writer and editor.
 
-Rewrite the following news into high-quality content.
+Your task:
+Rewrite the given news article into a high-quality, short, engaging news post.
 
-RULES:
-- Output ONLY valid JSON
-- No explanation text
-- Categories must include sub category first, then main category
-- Example categories:
-  "Football (Soccer), Sports"
-  "Politics, General / Global"
+Rules:
+1. Write a curious and informative headline (1–2 lines).
+2. Write the news in 2 or 3 short paragraphs.
+   - Improve clarity and quality.
+   - Remove junk and repetition.
+   - Keep it factual and engaging.
+3. Write one short notification line that creates curiosity.
+4. Choose categories using the rules below.
 
-JSON FORMAT:
+Categories rules (VERY IMPORTANT):
+- Use ONLY these main categories:
+  global / general
+  business and finance
+  science and technology
+  sports
+  trending
+  entertainment
+  lifestyle
+
+- Always write:
+  sub-category first, main category second
+- Use lowercase only
+- Comma separated
+- Multiple categories allowed
+
+Examples:
+- crypto, business and finance
+- football, sports
+- world news, global / general
+- movies, entertainment
+
+Output format:
+Return ONLY a valid JSON object.
+No explanations.
+No markdown.
+No extra text.
+
+JSON format:
 {
-  "headline": "",
-  "news": "",
-  "notification": "",
-  "categories": ""
+  "headline": "...",
+  "news": "paragraph 1\n\nparagraph 2",
+  "notification": "...",
+  "categories": "sub-category, main category"
 }
 
-NEWS:
-Title: {title}
-Content: {content}
+Input data:
+Headline: {{ORIGINAL_HEADLINE}}
+Article: {{ARTICLE_TEXT}}
+Link: {{NEWS_LINK}}
 """
 
 # ----------------------------------
