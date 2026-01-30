@@ -88,12 +88,12 @@ No markdown.
 No extra text.
 
 JSON format:
-{
+{{
   "headline": "...",
   "news": "paragraph 1\n\nparagraph 2",
   "notification": "...",
   "categories": "sub-category, main category"
-}
+}}
 
 Input data:
 Headline: {{ORIGINAL_HEADLINE}}
