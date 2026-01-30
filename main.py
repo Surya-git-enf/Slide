@@ -8,14 +8,14 @@ from datetime import datetime
 from supabase import create_client
 import google.generativeai as genai
 from dotenv import load_dotenv
-from fastapi import Fastapi
+from fastapi import FastAPI
 
 
 # ----------------------------------
 # Load environment variables
 # ----------------------------------
 load_dotenv()
-app = fastapi()
+app = FastAPI()
 
 SUPABASE_URL = os.getenv("SUPABASE_URL")
 SUPABASE_KEY = os.getenv("SUPABASE_KEY")
