@@ -11,3 +11,4 @@ google-generativeai
 supabase
 dotenv
 fastapi
+google-genai
