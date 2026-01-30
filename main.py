@@ -16,7 +16,9 @@ from fastapi import FastAPI
 # ----------------------------------
 load_dotenv()
 app = FastAPI()
-
+@app.get("/health")
+def health():
+    return{"status":"good"}
 SUPABASE_URL = os.getenv("SUPABASE_URL")
 SUPABASE_KEY = os.getenv("SUPABASE_KEY")
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
