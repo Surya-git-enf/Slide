@@ -33,6 +33,9 @@ def health():
 RSS_URLS = [
     "https://feeds.bbci.co.uk/news/world/rss.xml",
     "https://feeds.bbci.co.uk/news/business/rss.xml",
+    "https://news.google.com/rss",
+    "https://news.google.com/rss/headlines/section/topic/BUSINESS",
+    "https://news.google.com/rss/headlines/section/topic/TECHNOLOGY",
 ]
 
 # ---------------- PROMPT ----------------
@@ -68,7 +71,7 @@ Article: {article}
 """
 
 # ---------------- HELPERS ----------------
-def article_text(url):
+d"ef article_text(url):
     try:
         r = requests.get(url, headers={"User-Agent": "Mozilla/5.0"}, timeout=10)
         soup = BeautifulSoup(r.text, "html.parser")
