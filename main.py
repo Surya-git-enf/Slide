@@ -104,7 +104,7 @@ Link: {news_link}
 # Run for 30 minutes total
 # ----------------------------------
 START_TIME = time.time()
-RUN_DURATION = 30 * 60      # 30 minutes
+RUN_DURATION = 30 * 10      # 30 minutes
 SLEEP_TIME = 30 * 60        # run every 30 minutes
 
 # Create genai client (Gemini Developer API mode using API key)
