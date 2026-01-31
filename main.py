@@ -89,13 +89,15 @@ def clean_ai_json(text):
 
 # ---------------- API ----------------
 @app.get("/news")
-def fetch_news():
-    saved = 0
+def news():
+    print("🚀 News worker started...")
+    results = []
 
     for rss in RSS_URLS:
         feed = feedparser.parse(rss)
 
         for entry in feed.entries[:10]:
+
             if already_exists(entry.link):
                 continue
 
@@ -117,7 +119,14 @@ def fetch_news():
 
             try:
                 response = model.generate_content(prompt)
-                ai_json = clean_ai_json(response.text)
+                clean_text = response.text.strip()
+
+                # remove markdown if Gemini adds ```json
+                if clean_text.startswith("```"):
+                    clean_text = clean_text.replace("```json", "").replace("```", "").strip()
+
+                ai_json = json.loads(clean_text)
+
             except Exception as e:
                 print("❌ AI error:", e)
                 continue
@@ -137,6 +146,9 @@ def fetch_news():
             }
 
             supabase.table("news").insert(data).execute()
-            saved += 1
+            results.append(ai_json["headline"])
 
-    return {"status": "done", "saved": saved}
+    return {
+        "inserted_count": len(results),
+        "headlines": results
+    }
