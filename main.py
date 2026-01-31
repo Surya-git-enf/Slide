@@ -84,8 +84,9 @@ def already_exists(link):
 
 @app.get("/news")
 # ---------------- MAIN LOOP ----------------
-print("🚀 News worker started...")
+
 def news():
+    print("🚀 News worker started...")
     print("⏰ Fetching news at", datetime.now())
 
     for rss in RSS_URLS:
