@@ -37,6 +37,15 @@ RSS_URLS = [
     "https://news.google.com/rss",
     "https://news.google.com/rss/headlines/section/topic/BUSINESS",
     "https://news.google.com/rss/headlines/section/topic/TECHNOLOGY",
+    "https://feeds.reuters.com/reuters/worldNews",
+    "https://apnews.com/rss",
+    "https://feeds.bbci.co.uk/news/business/rss.xml",
+    "https://feeds.reuters.com/reuters/businessNews",
+    "https://www.cnbc.com/id/100003114/device/rss/rss.html",
+    "https://techcrunch.com/feed/",
+    "https://feeds.bbci.co.uk/sport/rss.xml",
+    "https://feeds.bbci.co.uk/news/entertainment_and_arts/rss.xml"
+    
 ]
 
 # ---------------- PROMPT ----------------
@@ -51,7 +60,7 @@ Rules:
 - Categories = sub-category first below , in small letters ,then main category,you can use multiple categories 
 
 Main categories:
-global / general, sub categories - Breaking News,
+general / global, sub categories - Breaking News,
 National News,
 World News,
 Politics,
@@ -60,14 +69,14 @@ Elections,
 International Relations,
 Crime Reports,
 Cyber Crime
-business and finance,
+business & finance,
 sub categories - Stock Market,
 Banking & Loans,
 Cryptocurrency,
 Economy & Inflation,
 Corporate News,
 Investments & Funding,
-science and technology,
+science & technology,
 sub categories - Technology News,
 Artificial Intelligence,
 Machine Learning,
@@ -101,7 +110,7 @@ Celebrity News,
 OTT / Streaming,
 TV Shows,
 
-lifestyle
+lifestyle & society 
 sub categories - Health & Wellness
 Mental Health
 Food & Nutrition
