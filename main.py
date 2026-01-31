@@ -23,7 +23,7 @@ if not SUPABASE_URL or not SUPABASE_KEY or not GEMINI_API_KEY:
 supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 genai.configure(api_key=GEMINI_API_KEY)
-model = genai.GenerativeModel("models/gemini-1.5-flash")
+model = genai.GenerativeModel("gemini-pro")  # ✅ FIXED
 
 # ---------------- RSS ----------------
 RSS_URLS = [
@@ -42,6 +42,15 @@ Rules:
 - 2–3 short paragraphs
 - Categories = sub-category first, then main category
 
+Main categories:
+global / general,
+business and finance,
+science and technology,
+sports,
+trending,
+entertainment,
+lifestyle
+
 JSON FORMAT:
 {{
   "headline": "",
@@ -49,6 +58,7 @@ JSON FORMAT:
   "notification": "",
   "categories": ""
 }}
+
 Title: {title}
 Article: {article}
 """
@@ -56,27 +66,22 @@ Article: {article}
 # ---------------- HELPERS ----------------
 def article_text(url):
     try:
-        r = requests.get(url, timeout=10, headers={"User-Agent": "Mozilla/5.0"})
+        r = requests.get(url, headers={"User-Agent": "Mozilla/5.0"}, timeout=10)
         soup = BeautifulSoup(r.text, "html.parser")
         art = soup.find("article")
         if art:
             return art.get_text(" ", strip=True)
-    except Exception as e:
-        print("❌ Article fetch error:", e)
+    except:
+        pass
     return ""
 
 
 def already_exists(link):
-    try:
-        res = supabase.table("news").select("id").eq("link", link).execute()
-        return bool(res.data)
-    except Exception as e:
-        print("❌ Supabase check error:", e)
-        return False
+    res = supabase.table("news").select("id").eq("link", link).execute()
+    return bool(res.data)
 
 
 def clean_json(text):
-    """Remove ```json markdown safely"""
     text = text.strip()
     if text.startswith("```"):
         text = text.replace("```json", "").replace("```", "").strip()
@@ -84,18 +89,15 @@ def clean_json(text):
 
 # ---------------- API ----------------
 @app.get("/news")
-def news():
+def fetch_news():
     inserted = []
     errors = []
 
     for rss in RSS_URLS:
-        try:
-            feed = feedparser.parse(rss)
-        except Exception as e:
-            errors.append(f"RSS error: {rss}")
-            continue
+        feed = feedparser.parse(rss)
 
-        for entry in feed.entries[:10]:
+        for entry in feed.entries[:5]:
+
             try:
                 if already_exists(entry.link):
                     continue
@@ -119,13 +121,17 @@ def news():
                 response = model.generate_content(prompt)
                 ai_json = clean_json(response.text)
 
+                image = ""
+                if hasattr(entry, "media_thumbnail"):
+                    image = entry.media_thumbnail[0].get("url", "")
+
                 data = {
                     "headline": ai_json["headline"],
                     "news": ai_json["news"],
                     "notification": ai_json["notification"],
                     "categories": ai_json["categories"],
                     "link": entry.link,
-                    "image": "",
+                    "image": image,
                     "published_date": pub_date.isoformat(),
                 }
 
@@ -133,12 +139,10 @@ def news():
                 inserted.append(ai_json["headline"])
 
             except Exception as e:
-                print("❌ Entry error:", e)
                 errors.append(str(e))
-                continue
 
     return {
         "inserted_count": len(inserted),
         "headlines": inserted,
-        "errors": errors[:5]  # limit error spam
+        "errors": errors
     }
