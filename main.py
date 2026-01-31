@@ -162,7 +162,7 @@ def fetch_news():
     for rss in RSS_URLS:
         feed = feedparser.parse(rss)
 
-        for entry in feed.entries[:5]:
+        for entry in feed.entries[:15]:
 
             try:
                 if already_exists(entry.link):
