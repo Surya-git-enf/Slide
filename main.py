@@ -132,6 +132,7 @@ def fetch_news():
                     "categories": ai_json["categories"],
                     "link": entry.link,
                     "image": image,
+                    "original":entry.title,
                     "published_date": pub_date.isoformat(),
                 }
 
