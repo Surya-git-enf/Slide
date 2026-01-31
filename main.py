@@ -39,49 +39,44 @@ Rewrite the news clearly and attractively.
 
 Rules:
 - Output ONLY valid JSON
-- 2–3 short paragraphs for news
+- 2–3 short paragraphs
 - Categories = sub-category first, then main category
 
-Main categories:
-global / general,
-business and finance,
-science and technology,
-sports,
-trending,
-entertainment,
-lifestyle
-
 JSON FORMAT:
-{
+{{
   "headline": "",
   "news": "",
   "notification": "",
   "categories": ""
-}
-
+}}
 Title: {title}
 Article: {article}
 """
 
-# ---------------- FUNCTIONS ----------------
+# ---------------- HELPERS ----------------
 def article_text(url):
     try:
-        r = requests.get(url, headers={"User-Agent": "Mozilla/5.0"}, timeout=10)
+        r = requests.get(url, timeout=10, headers={"User-Agent": "Mozilla/5.0"})
         soup = BeautifulSoup(r.text, "html.parser")
         art = soup.find("article")
         if art:
             return art.get_text(" ", strip=True)
-    except:
-        pass
+    except Exception as e:
+        print("❌ Article fetch error:", e)
     return ""
 
 
 def already_exists(link):
-    res = supabase.table("news").select("id").eq("link", link).execute()
-    return bool(res.data)
+    try:
+        res = supabase.table("news").select("id").eq("link", link).execute()
+        return bool(res.data)
+    except Exception as e:
+        print("❌ Supabase check error:", e)
+        return False
 
 
-def clean_ai_json(text):
+def clean_json(text):
+    """Remove ```json markdown safely"""
     text = text.strip()
     if text.startswith("```"):
         text = text.replace("```json", "").replace("```", "").strip()
@@ -90,65 +85,60 @@ def clean_ai_json(text):
 # ---------------- API ----------------
 @app.get("/news")
 def news():
-    print("🚀 News worker started...")
-    results = []
+    inserted = []
+    errors = []
 
     for rss in RSS_URLS:
-        feed = feedparser.parse(rss)
+        try:
+            feed = feedparser.parse(rss)
+        except Exception as e:
+            errors.append(f"RSS error: {rss}")
+            continue
 
         for entry in feed.entries[:10]:
-
-            if already_exists(entry.link):
-                continue
-
-            if not hasattr(entry, "published_parsed"):
-                continue
-
-            pub_date = datetime(*entry.published_parsed[:6])
-            if (datetime.now() - pub_date).days > 3:
-                continue
-
-            article = article_text(entry.link)
-            if not article:
-                continue
-
-            prompt = PROMPT.format(
-                title=entry.title,
-                article=article
-            )
-
             try:
+                if already_exists(entry.link):
+                    continue
+
+                if not hasattr(entry, "published_parsed"):
+                    continue
+
+                pub_date = datetime(*entry.published_parsed[:6])
+                if (datetime.now() - pub_date).days > 3:
+                    continue
+
+                article = article_text(entry.link)
+                if not article:
+                    continue
+
+                prompt = PROMPT.format(
+                    title=entry.title,
+                    article=article
+                )
+
                 response = model.generate_content(prompt)
-                clean_text = response.text.strip()
+                ai_json = clean_json(response.text)
 
-                # remove markdown if Gemini adds ```json
-                if clean_text.startswith("```"):
-                    clean_text = clean_text.replace("```json", "").replace("```", "").strip()
+                data = {
+                    "headline": ai_json["headline"],
+                    "news": ai_json["news"],
+                    "notification": ai_json["notification"],
+                    "categories": ai_json["categories"],
+                    "link": entry.link,
+                    "image": "",
+                    "published_date": pub_date.isoformat(),
+                }
 
-                ai_json = json.loads(clean_text)
+                supabase.table("news").insert(data).execute()
+                inserted.append(ai_json["headline"])
 
             except Exception as e:
-                print("❌ AI error:", e)
+                print("❌ Entry error:", e)
+                errors.append(str(e))
                 continue
 
-            image = ""
-            if hasattr(entry, "media_thumbnail"):
-                image = entry.media_thumbnail[0].get("url", "")
-
-            data = {
-                "headline": ai_json["headline"],
-                "news": ai_json["news"],
-                "notification": ai_json["notification"],
-                "categories": ai_json["categories"],
-                "link": entry.link,
-                "image": image,
-                "published_date": pub_date.isoformat(),
-            }
-
-            supabase.table("news").insert(data).execute()
-            results.append(ai_json["headline"])
-
     return {
-        "inserted_count": len(results),
-        "headlines": results
+        "inserted_count": len(inserted),
+        "headlines": inserted,
+        "errors": errors[:5]  # limit error spam
     }
