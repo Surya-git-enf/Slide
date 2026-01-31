@@ -47,17 +47,66 @@ Rewrite the news clearly and attractively.
 Rules:
 - Output ONLY valid JSON
 - 2–3 short paragraphs
-- Categories = sub-category first, then main category
+- Categories = sub-category first below , in small letters ,then main category,you can use multiple categories 
 
 Main categories:
-global / general,
+global / general, sub categories - Breaking News,
+National News,
+World News,
+Politics,
+Government Policy,
+Elections,
+International Relations,
+Crime Reports,
+Cyber Crime
 business and finance,
+sub categories - Stock Market,
+Banking & Loans,
+Cryptocurrency,
+Economy & Inflation,
+Corporate News,
+Investments & Funding,
 science and technology,
+sub categories - Technology News,
+Artificial Intelligence,
+Machine Learning,
+Robotics,
+Cybersecurity,
+Space & Astronomy,
+Space Missions,
+ISRO / NASA News,
+Gadgets & Reviews,
+Startup News,
+Tech Startups,
+AI Startups,
+Innovation & Research
 sports,
+sub categories - Cricket,
+Football,
+Match Results,
+Player News,
+Tournaments,
+Sports Events,
 trending,
+sub categories - Viral News
+Social Media Trends
+Memes & Challenges
+Internet Sensations
+Public Buzz
 entertainment,
-lifestyle
+sub categories - Movies,
+Music,
+Celebrity News,
+OTT / Streaming,
+TV Shows,
 
+lifestyle
+sub categories - Health & Wellness
+Mental Health
+Food & Nutrition
+Travel
+Fashion
+Fitness
 JSON FORMAT:
 {{
   "headline": "",
