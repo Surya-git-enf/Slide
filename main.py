@@ -17,6 +17,7 @@ import google.generativeai as genai
 SUPABASE_URL = os.getenv("SUPABASE_URL")
 SUPABASE_KEY = os.getenv("SUPABASE_KEY")
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+GOOGLE_MODEL = os.getenv("GOOGLE_MODEL")
 app = FastAPI()
 
 if not SUPABASE_URL or not SUPABASE_KEY or not GEMINI_API_KEY:
@@ -114,7 +115,12 @@ def news():
 
             try:
                 response = model.generate_content(prompt)
-                ai_json = json.loads(response.text)
+                clean_text = response.text.strip()
+
+                # remove markdown if Gemini adds it
+                if clean_text.startswith("```"):
+                    clean_text = clean_text.replace("```json", "").replace("```", "").strip()
+                    ai_json = json.loads(clean_text)
             except Exception as e:
                 return("❌ AI error:", e)
                 continue
