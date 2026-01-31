@@ -121,7 +121,7 @@ Article: {article}
 """
 
 # ---------------- HELPERS ----------------
-d"ef article_text(url):
+def article_text(url):
     try:
         r = requests.get(url, headers={"User-Agent": "Mozilla/5.0"}, timeout=10)
         soup = BeautifulSoup(r.text, "html.parser")
