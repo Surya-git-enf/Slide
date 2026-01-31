@@ -8,6 +8,7 @@ import feedparser
 from bs4 import BeautifulSoup
 from supabase import create_client
 import google.generativeai as genai
+from pydantic import BaseModel
 
 # ---------------- ENV ----------------
 SUPABASE_URL = os.getenv("SUPABASE_URL")
@@ -203,3 +204,55 @@ def fetch_news():
         "headlines": inserted,
         "errors": errors
     }
+
+class GetNews(BaseModel):
+    email: str
+
+@app.post("/get_news")
+def get_news(user: GetNews):
+
+    email = user.email
+    final_news = []
+
+    # 1️⃣ Get user suggestions
+    user_res = supabase.table("users") \
+        .select("suggestions") \
+        .eq("email", email) \
+        .execute()
+
+    if not user_res.data:
+        return {"news": []}
+
+    suggestions = user_res.data[0]["suggestions"] or []
+
+    # make all suggestions lowercase
+    suggestions = [s.lower() for s in suggestions]
+
+    # 2️⃣ Get all news
+    news_res = supabase.table("news") \
+        .select("*") \
+        .order("published_date", desc=True) \
+        .execute()
+
+    # 3️⃣ Match suggestions with categories
+    for row in news_res.data:
+
+        categories = (row.get("categories") or "").lower()
+
+        for sug in suggestions:
+            if sug in categories:
+                final_news.append({
+                    "headline": row["headline"],
+                    "news": row["news"],
+                    "notification": row["notification"],
+                    "categories": row["categories"],
+                    "link": row["link"],
+                    "image": row["image"],
+                    "published_date": row["published_date"]
+                })
+                break  # avoid duplicate same news
+
+        if len(final_news) >= 5:
+            break
+
+    return {"news": final_news}
