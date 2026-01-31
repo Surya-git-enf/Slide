@@ -1,9 +1,5 @@
 # main.py
-# Simple infinite-loop news ingester
-# Runs every 30 minutes and stores AI-written news into Supabase
-
 import os
-import time
 import json
 from datetime import datetime
 from fastapi import FastAPI
@@ -13,11 +9,11 @@ from bs4 import BeautifulSoup
 from supabase import create_client
 import google.generativeai as genai
 
-# ---------------- ENV VARIABLES ----------------
+# ---------------- ENV ----------------
 SUPABASE_URL = os.getenv("SUPABASE_URL")
 SUPABASE_KEY = os.getenv("SUPABASE_KEY")
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
-GOOGLE_MODEL = os.getenv("GOOGLE_MODEL")
+
 app = FastAPI()
 
 if not SUPABASE_URL or not SUPABASE_KEY or not GEMINI_API_KEY:
@@ -27,9 +23,9 @@ if not SUPABASE_URL or not SUPABASE_KEY or not GEMINI_API_KEY:
 supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 genai.configure(api_key=GEMINI_API_KEY)
-model = genai.GenerativeModel("gemini-2.5-flash")
+model = genai.GenerativeModel("gemini-pro")
 
-# ---------------- RSS FEEDS ----------------
+# ---------------- RSS ----------------
 RSS_URLS = [
     "https://feeds.bbci.co.uk/news/world/rss.xml",
     "https://feeds.bbci.co.uk/news/business/rss.xml",
@@ -43,24 +39,25 @@ Rewrite the news clearly and attractively.
 
 Rules:
 - Output ONLY valid JSON
-- Use 2–3 short paragraphs for news
-- Categories must include sub-category first, then main category
-- Main categories allowed:
-  global / general,
-  business and finance,
-  science and technology,
-  sports,
-  trending,
-  entertainment,
-  lifestyle
+- 2–3 short paragraphs for news
+- Categories = sub-category first, then main category
+
+Main categories:
+global / general,
+business and finance,
+science and technology,
+sports,
+trending,
+entertainment,
+lifestyle
 
 JSON FORMAT:
-{{
+{
   "headline": "",
   "news": "",
   "notification": "",
   "categories": ""
-}}
+}
 
 Title: {title}
 Article: {article}
@@ -83,12 +80,17 @@ def already_exists(link):
     res = supabase.table("news").select("id").eq("link", link).execute()
     return bool(res.data)
 
-@app.get("/news")
-# ---------------- MAIN LOOP ----------------
 
-def news():
-    print("🚀 News worker started...")
-    print("⏰ Fetching news at", datetime.now())
+def clean_ai_json(text):
+    text = text.strip()
+    if text.startswith("```"):
+        text = text.replace("```json", "").replace("```", "").strip()
+    return json.loads(text)
+
+# ---------------- API ----------------
+@app.get("/news")
+def fetch_news():
+    saved = 0
 
     for rss in RSS_URLS:
         feed = feedparser.parse(rss)
@@ -115,14 +117,9 @@ def news():
 
             try:
                 response = model.generate_content(prompt)
-                clean_text = response.text.strip()
-
-                # remove markdown if Gemini adds it
-                if clean_text.startswith("```"):
-                    clean_text = clean_text.replace("```json", "").replace("```", "").strip()
-                    ai_json = json.loads(clean_text)
+                ai_json = clean_ai_json(response.text)
             except Exception as e:
-                return("❌ AI error:", e)
+                print("❌ AI error:", e)
                 continue
 
             image = ""
@@ -140,7 +137,6 @@ def news():
             }
 
             supabase.table("news").insert(data).execute()
-            return{"✅ Saved":ai_json["headline"]}
+            saved += 1
 
-
-    
+    return {"status": "done", "saved": saved}
