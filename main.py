@@ -116,7 +116,7 @@ def news():
                 response = model.generate_content(prompt)
                 ai_json = json.loads(response.text)
             except Exception as e:
-                print("❌ AI error:", e)
+                return("❌ AI error:", e)
                 continue
 
             image = ""
@@ -134,7 +134,7 @@ def news():
             }
 
             supabase.table("news").insert(data).execute()
-            print("✅ Saved:", ai_json["headline"])
+            return{"✅ Saved":ai_json["headline"]}
 
-    print("😴 Sleeping for 30 minutes...\n")
+
     
