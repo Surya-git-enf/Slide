@@ -25,6 +25,10 @@ supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 genai.configure(api_key=GEMINI_API_KEY)
 model = genai.GenerativeModel("gemini-2.5-flash")  # ✅ FIXED
 
+@app.get("/health")
+def health():
+    return{"status":"running"}
+
 # ---------------- RSS ----------------
 RSS_URLS = [
     "https://feeds.bbci.co.uk/news/world/rss.xml",
