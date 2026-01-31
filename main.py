@@ -6,7 +6,7 @@ import os
 import time
 import json
 from datetime import datetime
-
+from fastapi import FastAPI
 import requests
 import feedparser
 from bs4 import BeautifulSoup
@@ -17,6 +17,7 @@ import google.generativeai as genai
 SUPABASE_URL = os.getenv("SUPABASE_URL")
 SUPABASE_KEY = os.getenv("SUPABASE_KEY")
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+app = FastAPI()
 
 if not SUPABASE_URL or not SUPABASE_KEY or not GEMINI_API_KEY:
     raise Exception("Missing environment variables")
@@ -81,11 +82,10 @@ def already_exists(link):
     res = supabase.table("news").select("id").eq("link", link).execute()
     return bool(res.data)
 
-
+@app.get("/news")
 # ---------------- MAIN LOOP ----------------
 print("🚀 News worker started...")
-
-while True:
+def news():
     print("⏰ Fetching news at", datetime.now())
 
     for rss in RSS_URLS:
@@ -136,4 +136,4 @@ while True:
             print("✅ Saved:", ai_json["headline"])
 
     print("😴 Sleeping for 30 minutes...\n")
-    time.sleep(1800)
+    
