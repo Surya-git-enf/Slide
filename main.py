@@ -23,7 +23,7 @@ if not SUPABASE_URL or not SUPABASE_KEY or not GEMINI_API_KEY:
 supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 genai.configure(api_key=GEMINI_API_KEY)
-model = genai.GenerativeModel("gemini-pro")
+model = genai.GenerativeModel("models/gemini-1.5-flash")
 
 # ---------------- RSS ----------------
 RSS_URLS = [
