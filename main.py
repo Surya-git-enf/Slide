@@ -33,7 +33,6 @@ def health():
 # ---------------- RSS ----------------
 RSS_URLS = [
     "https://feeds.bbci.co.uk/news/rss.xml",
-"https://feeds.bbci.co.uk/news/business/rss.xml"
     
 ]
 
