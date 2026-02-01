@@ -32,19 +32,8 @@ def health():
 
 # ---------------- RSS ----------------
 RSS_URLS = [
-    "https://feeds.bbci.co.uk/news/world/rss.xml",
-    "https://feeds.bbci.co.uk/news/business/rss.xml",
-    "https://news.google.com/rss",
-    "https://news.google.com/rss/headlines/section/topic/BUSINESS",
-    "https://news.google.com/rss/headlines/section/topic/TECHNOLOGY",
-    "https://feeds.reuters.com/reuters/worldNews",
-    "https://apnews.com/rss",
-    "https://feeds.bbci.co.uk/news/business/rss.xml",
-    "https://feeds.reuters.com/reuters/businessNews",
-    "https://www.cnbc.com/id/100003114/device/rss/rss.html",
-    "https://techcrunch.com/feed/",
-    "https://feeds.bbci.co.uk/sport/rss.xml",
-    "https://feeds.bbci.co.uk/news/entertainment_and_arts/rss.xml"
+    "https://feeds.bbci.co.uk/news/rss.xml",
+"https://feeds.bbci.co.uk/news/business/rss.xml"
     
 ]
 
