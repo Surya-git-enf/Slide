@@ -9,13 +9,22 @@ from bs4 import BeautifulSoup
 from supabase import create_client
 import google.generativeai as genai
 from pydantic import BaseModel
-
+from fastapi.middleware.cors import CORSMiddleware
 # ---------------- ENV ----------------
 SUPABASE_URL = os.getenv("SUPABASE_URL")
 SUPABASE_KEY = os.getenv("SUPABASE_KEY")
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 
+
 app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],   # for testing
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 if not SUPABASE_URL or not SUPABASE_KEY or not GEMINI_API_KEY:
     raise Exception("Missing environment variables")
