@@ -37,11 +37,6 @@ RSS_URLS = [
   "http://newsrss.bbc.co.uk/rss/newsonline_uk_edition/business/rss.xml",
   "http://newsrss.bbc.co.uk/rss/newsonline_uk_edition/technology/rss.xml",
   "http://newsrss.bbc.co.uk/rss/newsonline_uk_edition/uk_politics/rss.xml",
-  "http://news.bbc.co.uk/rss/newsonline_uk_edition/latest_published_stories/rss.xml",
-  "https://www.theguardian.com/world/rss",
-  "https://www.theguardian.com/uk-news/rss",
-  "https://www.theguardian.com/business/rss",
-  "https://www.theguardian.com/technology/rss"
 ]
 
 # ---------------- PROMPT ----------------
