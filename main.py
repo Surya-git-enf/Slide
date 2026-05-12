@@ -1,54 +1,51 @@
-# main.py
+
 import os
 import json
 from datetime import datetime
-from fastapi import FastAPI
+from fastapi import FastAPI, BackgroundTasks
+from fastapi.responses import JSONResponse
+from fastapi.middleware.cors import CORSMiddleware
 import requests
 import feedparser
 from bs4 import BeautifulSoup
 from supabase import create_client
 import google.generativeai as genai
 from pydantic import BaseModel
-from fastapi.middleware.cors import CORSMiddleware
-# ---------------- ENV ----------------
-SUPABASE_URL = os.getenv("SUPABASE_URL")
-SUPABASE_KEY = os.getenv("SUPABASE_KEY")
-GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 
+# ─────────────────────────── ENV ────────────────────────────
+SUPABASE_URL    = os.getenv("SUPABASE_URL")
+SUPABASE_KEY    = os.getenv("SUPABASE_KEY")
+GEMINI_API_KEY  = os.getenv("GEMINI_API_KEY")
 
+if not SUPABASE_URL or not SUPABASE_KEY or not GEMINI_API_KEY:
+    raise Exception("Missing environment variables")
+
+# ─────────────────────────── CLIENTS ────────────────────────
+supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
+genai.configure(api_key=GEMINI_API_KEY)
+model = genai.GenerativeModel("gemini-2.5-flash")
+
+# ─────────────────────────── APP ────────────────────────────
 app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],   # for testing
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-if not SUPABASE_URL or not SUPABASE_KEY or not GEMINI_API_KEY:
-    raise Exception("Missing environment variables")
-
-# ---------------- CLIENTS ----------------
-supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
-
-genai.configure(api_key=GEMINI_API_KEY)
-model = genai.GenerativeModel("gemini-2.5-flash")  # ✅ FIXED
-
-@app.get("/health")
-def health():
-    return{"status":"running"}
-
-# ---------------- RSS ----------------
+# ─────────────────────────── RSS FEEDS ──────────────────────
 RSS_URLS = [
-  "http://newsrss.bbc.co.uk/rss/newsonline_uk_edition/front_page/rss.xml",
-  "http://newsrss.bbc.co.uk/rss/newsonline_uk_edition/world/rss.xml",
-  "http://newsrss.bbc.co.uk/rss/newsonline_uk_edition/business/rss.xml",
-  "http://newsrss.bbc.co.uk/rss/newsonline_uk_edition/technology/rss.xml",
-  "http://newsrss.bbc.co.uk/rss/newsonline_uk_edition/uk_politics/rss.xml",
+    "http://newsrss.bbc.co.uk/rss/newsonline_uk_edition/front_page/rss.xml",
+    "http://newsrss.bbc.co.uk/rss/newsonline_uk_edition/world/rss.xml",
+    "http://newsrss.bbc.co.uk/rss/newsonline_uk_edition/business/rss.xml",
+    "http://newsrss.bbc.co.uk/rss/newsonline_uk_edition/technology/rss.xml",
+    "http://newsrss.bbc.co.uk/rss/newsonline_uk_edition/uk_politics/rss.xml",
 ]
 
-# ---------------- PROMPT ----------------
+# ─────────────────────────── PROMPT ─────────────────────────
 PROMPT = """
 You are a professional news writer.
 
@@ -57,66 +54,17 @@ Rewrite the news clearly and attractively.
 Rules:
 - Output ONLY valid JSON
 - 2–3 short paragraphs
-- Categories = sub-category first below , in small letters ,then main category,you can use multiple categories 
+- Categories = sub-category first below, in small letters, then main category, you can use multiple categories
 
 Main categories:
-general / global, sub categories - Breaking News,
-National News,
-World News,
-Politics,
-Government Policy,
-Elections,
-International Relations,
-Crime Reports,
-Cyber Crime
-business & finance,
-sub categories - Stock Market,
-Banking & Loans,
-Cryptocurrency,
-Economy & Inflation,
-Corporate News,
-Investments & Funding,
-science & technology,
-sub categories - Technology News,
-Artificial Intelligence,
-Machine Learning,
-Robotics,
-Cybersecurity,
-Space & Astronomy,
-Space Missions,
-ISRO / NASA News,
-Gadgets & Reviews,
-Startup News,
-Tech Startups,
-AI Startups,
-Innovation & Research
-sports,
-sub categories - Cricket,
-Football,
-Match Results,
-Player News,
-Tournaments,
-Sports Events,
-trending,
-sub categories - Viral News
-Social Media Trends
-Memes & Challenges
-Internet Sensations
-Public Buzz
-entertainment,
-sub categories - Movies,
-Music,
-Celebrity News,
-OTT / Streaming,
-TV Shows,
+general / global, sub categories - Breaking News, National News, World News, Politics, Government Policy, Elections, International Relations, Crime Reports, Cyber Crime
+business & finance, sub categories - Stock Market, Banking & Loans, Cryptocurrency, Economy & Inflation, Corporate News, Investments & Funding
+science & technology, sub categories - Technology News, Artificial Intelligence, Machine Learning, Robotics, Cybersecurity, Space & Astronomy, Space Missions, ISRO / NASA News, Gadgets & Reviews, Startup News, Tech Startups, AI Startups, Innovation & Research
+sports, sub categories - Cricket, Football, Match Results, Player News, Tournaments, Sports Events
+trending, sub categories - Viral News, Social Media Trends, Memes & Challenges, Internet Sensations, Public Buzz
+entertainment, sub categories - Movies, Music, Celebrity News, OTT / Streaming, TV Shows
+lifestyle & society, sub categories - Health & Wellness, Mental Health, Food & Nutrition, Travel, Fashion, Fitness
 
-lifestyle & society 
-sub categories - Health & Wellness
-Mental Health
-Food & Nutrition
-Travel
-Fashion
-Fitness
 JSON FORMAT:
 {{
   "headline": "",
@@ -129,41 +77,43 @@ Title: {title}
 Article: {article}
 """
 
-# ---------------- HELPERS ----------------
-def article_text(url):
+# ─────────────────────────── HELPERS ────────────────────────
+def article_text(url: str) -> str:
     try:
         r = requests.get(url, headers={"User-Agent": "Mozilla/5.0"}, timeout=10)
         soup = BeautifulSoup(r.text, "html.parser")
         art = soup.find("article")
         if art:
             return art.get_text(" ", strip=True)
-    except:
+    except Exception:
         pass
     return ""
 
 
-def already_exists(link):
+def already_exists(link: str) -> bool:
     res = supabase.table("news").select("id").eq("link", link).execute()
     return bool(res.data)
 
 
-def clean_json(text):
+def clean_json(text: str) -> dict:
     text = text.strip()
     if text.startswith("```"):
         text = text.replace("```json", "").replace("```", "").strip()
     return json.loads(text)
 
-# ---------------- API ----------------
-@app.get("/news")
-def fetch_news():
-    inserted = []
-    errors = []
 
-    for rss in RSS_URLS:
-        feed = feedparser.parse(rss)
+# ─────────────────────────── BACKGROUND JOB ─────────────────
+# This runs AFTER the response is already sent to the client.
+# Render's 30-second timeout does NOT apply to BackgroundTasks.
+def run_news_fetch():
+    """Fetch RSS → scrape → Gemini → insert into Supabase. Runs in background."""
+    inserted = []
+    errors   = []
+
+    for rss_url in RSS_URLS:
+        feed = feedparser.parse(rss_url)
 
         for entry in feed.entries[:15]:
-
             try:
                 if already_exists(entry.link):
                     continue
@@ -179,26 +129,22 @@ def fetch_news():
                 if not article:
                     continue
 
-                prompt = PROMPT.format(
-                    title=entry.title,
-                    article=article
-                )
-
+                prompt   = PROMPT.format(title=entry.title, article=article)
                 response = model.generate_content(prompt)
-                ai_json = clean_json(response.text)
+                ai_json  = clean_json(response.text)
 
                 image = ""
                 if hasattr(entry, "media_thumbnail"):
                     image = entry.media_thumbnail[0].get("url", "")
 
                 data = {
-                    "headline": ai_json["headline"],
-                    "news": ai_json["news"],
-                    "notification": ai_json["notification"],
-                    "categories": ai_json["categories"],
-                    "link": entry.link,
-                    "image": image,
-                    "original":entry.title,
+                    "headline":       ai_json["headline"],
+                    "news":           ai_json["news"],
+                    "notification":   ai_json["notification"],
+                    "categories":     ai_json["categories"],
+                    "link":           entry.link,
+                    "image":          image,
+                    "original":       entry.title,
                     "published_date": pub_date.isoformat(),
                 }
 
@@ -208,60 +154,89 @@ def fetch_news():
             except Exception as e:
                 errors.append(str(e))
 
-    return {
-        "inserted_count": len(inserted),
-        "headlines": inserted,
-        "errors": errors
-    }
+    print(f"[BG] News fetch done — inserted: {len(inserted)}, errors: {len(errors)}")
+    if errors:
+        print(f"[BG] Errors: {errors[:5]}")  # log first 5 only
+
+
+# ─────────────────────────── ROUTES ─────────────────────────
+
+@app.get("/health")
+def health():
+    return {"status": "running"}
+
+
+@app.get("/news")
+def trigger_news_fetch(background_tasks: BackgroundTasks):
+    """
+    Immediately returns 202 Accepted.
+    The actual RSS fetch + Gemini pipeline runs in the background
+    so it NEVER times out on Render's 30-second limit.
+    Safe to call from a cron job or the frontend.
+    """
+    background_tasks.add_task(run_news_fetch)
+    return JSONResponse(
+        status_code=202,
+        content={"status": "accepted", "message": "News fetch started in background"}
+    )
+
 
 class GetNews(BaseModel):
     email: str
 
+
 @app.post("/get_news")
 def get_news(user: GetNews):
-
+    """
+    Returns up to 15 personalised news items for the user instantly
+    from Supabase — no AI, no scraping, no timeouts.
+    Simultaneously tells the client it can trigger /news in the background.
+    """
     email = user.email
-    final_news = []
 
-    # 1️⃣ Get user suggestions
+    # 1. Get user suggestions
     user_res = supabase.table("users") \
         .select("suggestions") \
         .eq("email", email) \
         .execute()
 
     if not user_res.data:
-        return {"news": []}
+        return {"news": [], "trigger_refresh": True}
 
-    suggestions = user_res.data[0]["suggestions"] or []
+    suggestions = [s.lower() for s in (user_res.data[0]["suggestions"] or [])]
 
-    # make all suggestions lowercase
-    suggestions = [s.lower() for s in suggestions]
-
-    # 2️⃣ Get all news
+    # 2. Fetch latest 100 news rows (enough to filter from)
     news_res = supabase.table("news") \
         .select("*") \
         .order("published_date", desc=True) \
+        .limit(100) \
         .execute()
 
-    # 3️⃣ Match suggestions with categories
+    # 3. Match suggestions → categories
+    final_news = []
+    seen_links = set()
+
     for row in news_res.data:
+        if row.get("link") in seen_links:
+            continue
 
         categories = (row.get("categories") or "").lower()
+        matched    = any(sug in categories for sug in suggestions) if suggestions else True
 
-        for sug in suggestions:
-            if sug in categories:
-                final_news.append({
-                    "headline": row["headline"],
-                    "news": row["news"],
-                    "notification": row["notification"],
-                    "categories": row["categories"],
-                    "link": row["link"],
-                    "image": row["image"],
-                    "published_date": row["published_date"]
-                })
-                break  # avoid duplicate same news
+        if matched:
+            final_news.append({
+                "headline":     row["headline"],
+                "news":         row["news"],
+                "notification": row["notification"],
+                "categories":   row["categories"],
+                "link":         row["link"],
+                "image":        row["image"],
+                "published_date": row["published_date"],
+            })
+            seen_links.add(row.get("link"))
 
-        if len(final_news) >= 5:
+        if len(final_news) >= 15:   # ✅ return 15 instead of 5
             break
 
-    return {"news": final_news}
+    # trigger_refresh tells the frontend to silently call /news in background
+    return {"news": final_news, "trigger_refresh": len(final_news) < 5}
