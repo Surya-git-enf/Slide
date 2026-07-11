@@ -37,7 +37,7 @@ app.add_middleware(
 )
 
 # ─────────────────────────── RSS FEEDS ──────────────────────
-RSS_URLS =[
+RSS_URLS = [
     # ── World / General ──
     "http://feeds.bbci.co.uk/news/rss.xml",
     "http://feeds.bbci.co.uk/news/world/rss.xml",
@@ -64,8 +64,6 @@ RSS_URLS =[
     "https://feeds.arstechnica.com/arstechnica/index",
     "https://timesofindia.indiatimes.com/rssfeeds/66949542.cms",        # TOI Tech
     "https://rss.nytimes.com/services/xml/rss/nyt/Technology.xml",
-    "https://medium.com/feed/tag/technology",
-    "https://medium.com/feed/tag/artificial-intelligence",
 
     # ── Space & Science ──
     "https://www.space.com/feeds/all",
@@ -76,7 +74,6 @@ RSS_URLS =[
     # ── Health ──
     "https://rss.nytimes.com/services/xml/rss/nyt/Health.xml",
     "https://www.medicalnewstoday.com/rss",
-    "https://www.who.int/rss-feeds/news-english.xml",
 
     # ── Sports ──
     "http://feeds.bbci.co.uk/sport/rss.xml",
@@ -88,7 +85,6 @@ RSS_URLS =[
     "https://variety.com/feed/",
     "https://timesofindia.indiatimes.com/rssfeeds/1081479906.cms",      # TOI Entertainment
 ]
-
 
 # ─────────────────────────── PROMPT ─────────────────────────
 PROMPT = """
