@@ -37,24 +37,83 @@ app.add_middleware(
 )
 
 # ─────────────────────────── RSS FEEDS ──────────────────────
-RSS_URLS = [
-    "http://newsrss.bbc.co.uk/rss/newsonline_uk_edition/front_page/rss.xml",
-    "http://newsrss.bbc.co.uk/rss/newsonline_uk_edition/world/rss.xml",
-    "http://newsrss.bbc.co.uk/rss/newsonline_uk_edition/business/rss.xml",
-    "http://newsrss.bbc.co.uk/rss/newsonline_uk_edition/technology/rss.xml",
-    "http://newsrss.bbc.co.uk/rss/newsonline_uk_edition/uk_politics/rss.xml",
+RSS_URLS =[
+    # ── World / General ──
+    "http://feeds.bbci.co.uk/news/rss.xml",
+    "http://feeds.bbci.co.uk/news/world/rss.xml",
+    "http://feeds.bbci.co.uk/news/uk/rss.xml",
+    "https://timesofindia.indiatimes.com/rssfeedstopstories.cms",
+    "https://timesofindia.indiatimes.com/rssfeeds/296589292.cms",       # TOI World
+    "https://timesofindia.indiatimes.com/rssfeeds/-2128936835.cms",     # TOI India
+    "https://rss.nytimes.com/services/xml/rss/nyt/HomePage.xml",
+    "https://rss.nytimes.com/services/xml/rss/nyt/World.xml",
+
+    # ── Politics ──
+    "http://feeds.bbci.co.uk/news/politics/rss.xml",
+    "https://rss.nytimes.com/services/xml/rss/nyt/Politics.xml",
+
+    # ── Business & Finance ──
+    "http://feeds.bbci.co.uk/news/business/rss.xml",
+    "https://rss.nytimes.com/services/xml/rss/nyt/Business.xml",
+    "https://timesofindia.indiatimes.com/rssfeeds/1898055.cms",         # TOI Business
+
+    # ── Technology & Startups ──
+    "http://feeds.bbci.co.uk/news/technology/rss.xml",
+    "https://techcrunch.com/feed/",
+    "https://www.theverge.com/rss/index.xml",
+    "https://feeds.arstechnica.com/arstechnica/index",
+    "https://timesofindia.indiatimes.com/rssfeeds/66949542.cms",        # TOI Tech
+    "https://rss.nytimes.com/services/xml/rss/nyt/Technology.xml",
+    "https://medium.com/feed/tag/technology",
+    "https://medium.com/feed/tag/artificial-intelligence",
+
+    # ── Space & Science ──
+    "https://www.space.com/feeds/all",
+    "https://www.nasa.gov/rss/dyn/breaking_news.rss",
+    "https://rss.nytimes.com/services/xml/rss/nyt/Science.xml",
+    "https://www.sciencedaily.com/rss/all.xml",
+
+    # ── Health ──
+    "https://rss.nytimes.com/services/xml/rss/nyt/Health.xml",
+    "https://www.medicalnewstoday.com/rss",
+    "https://www.who.int/rss-feeds/news-english.xml",
+
+    # ── Sports ──
+    "http://feeds.bbci.co.uk/sport/rss.xml",
+    "https://www.espncricinfo.com/rss/content/story/feeds/6.xml",
+    "https://timesofindia.indiatimes.com/rssfeeds/4719148.cms",         # TOI Sports
+
+    # ── Entertainment ──
+    "http://feeds.bbci.co.uk/news/entertainment_and_arts/rss.xml",
+    "https://variety.com/feed/",
+    "https://timesofindia.indiatimes.com/rssfeeds/1081479906.cms",      # TOI Entertainment
 ]
+
 
 # ─────────────────────────── PROMPT ─────────────────────────
 PROMPT = """
-You are a professional news writer.
+You are Nova, an award-winning digital news editor for "Slide" — a fast, mobile-first
+news app read by busy, curious people who want to feel instantly informed and hooked
+from the very first line.
 
-Rewrite the news clearly and attractively.
+Rewrite the article below into scroll-stopping, addictive-but-accurate news copy.
 
-Rules:
-- Output ONLY valid JSON
-- 2–3 short paragraphs
-- Categories = sub-category first below, in small letters, then main category, you can use multiple categories
+VOICE & STYLE RULES:
+- Open the "news" field with a hook — a surprising fact, a stake, a tension, a "why
+  this matters now" — never a flat "X announced Y today."
+- Write like a sharp human journalist, not a press release: active voice, punchy and
+  varied sentence lengths, no filler adjectives, no throat-clearing.
+- Be 100% factually faithful to the source article. Never invent details, numbers,
+  quotes, or outcomes that aren't in the article.
+- 2–3 short, tight paragraphs. Every sentence has to earn its place.
+- "headline": clear AND compelling — the kind of line that makes someone tap while
+  scrolling — but never clickbait, never misleading.
+- "notification": a push-notification teaser, under 80 characters, punchy enough to
+  make someone open the app right now.
+- "categories": sub-category first (lowercase), then the main category, from the list
+  below. You may use multiple categories if genuinely relevant.
+
+Output ONLY valid JSON. No markdown, no code fences, no commentary before or after.
 
 Main categories:
 general / global, sub categories - Breaking News, National News, World News, Politics, Government Policy, Elections, International Relations, Crime Reports, Cyber Crime
@@ -66,12 +125,12 @@ entertainment, sub categories - Movies, Music, Celebrity News, OTT / Streaming, 
 lifestyle & society, sub categories - Health & Wellness, Mental Health, Food & Nutrition, Travel, Fashion, Fitness
 
 JSON FORMAT:
-{{
+{
   "headline": "",
   "news": "",
   "notification": "",
   "categories": ""
-}}
+}
 
 Title: {title}
 Article: {article}
