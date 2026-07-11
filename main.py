@@ -38,54 +38,12 @@ app.add_middleware(
 
 # ─────────────────────────── RSS FEEDS ──────────────────────
 RSS_URLS = [
-    # ── World / General ──
-    "http://feeds.bbci.co.uk/news/rss.xml",
-    "http://feeds.bbci.co.uk/news/world/rss.xml",
-    "http://feeds.bbci.co.uk/news/uk/rss.xml",
-    "https://timesofindia.indiatimes.com/rssfeedstopstories.cms",
-    "https://timesofindia.indiatimes.com/rssfeeds/296589292.cms",       # TOI World
-    "https://timesofindia.indiatimes.com/rssfeeds/-2128936835.cms",     # TOI India
-    "https://rss.nytimes.com/services/xml/rss/nyt/HomePage.xml",
-    "https://rss.nytimes.com/services/xml/rss/nyt/World.xml",
-
-    # ── Politics ──
-    "http://feeds.bbci.co.uk/news/politics/rss.xml",
-    "https://rss.nytimes.com/services/xml/rss/nyt/Politics.xml",
-
-    # ── Business & Finance ──
-    "http://feeds.bbci.co.uk/news/business/rss.xml",
-    "https://rss.nytimes.com/services/xml/rss/nyt/Business.xml",
-    "https://timesofindia.indiatimes.com/rssfeeds/1898055.cms",         # TOI Business
-
-    # ── Technology & Startups ──
-    "http://feeds.bbci.co.uk/news/technology/rss.xml",
-    "https://techcrunch.com/feed/",
-    "https://www.theverge.com/rss/index.xml",
-    "https://feeds.arstechnica.com/arstechnica/index",
-    "https://timesofindia.indiatimes.com/rssfeeds/66949542.cms",        # TOI Tech
-    "https://rss.nytimes.com/services/xml/rss/nyt/Technology.xml",
-
-    # ── Space & Science ──
-    "https://www.space.com/feeds/all",
-    "https://www.nasa.gov/rss/dyn/breaking_news.rss",
-    "https://rss.nytimes.com/services/xml/rss/nyt/Science.xml",
-    "https://www.sciencedaily.com/rss/all.xml",
-
-    # ── Health ──
-    "https://rss.nytimes.com/services/xml/rss/nyt/Health.xml",
-    "https://www.medicalnewstoday.com/rss",
-
-    # ── Sports ──
-    "http://feeds.bbci.co.uk/sport/rss.xml",
-    "https://www.espncricinfo.com/rss/content/story/feeds/6.xml",
-    "https://timesofindia.indiatimes.com/rssfeeds/4719148.cms",         # TOI Sports
-
-    # ── Entertainment ──
-    "http://feeds.bbci.co.uk/news/entertainment_and_arts/rss.xml",
-    "https://variety.com/feed/",
-    "https://timesofindia.indiatimes.com/rssfeeds/1081479906.cms",      # TOI Entertainment
+    "http://newsrss.bbc.co.uk/rss/newsonline_uk_edition/front_page/rss.xml",
+    "http://newsrss.bbc.co.uk/rss/newsonline_uk_edition/world/rss.xml",
+    "http://newsrss.bbc.co.uk/rss/newsonline_uk_edition/business/rss.xml",
+    "http://newsrss.bbc.co.uk/rss/newsonline_uk_edition/technology/rss.xml",
+    "http://newsrss.bbc.co.uk/rss/newsonline_uk_edition/uk_politics/rss.xml",
 ]
-
 # ─────────────────────────── PROMPT ─────────────────────────
 PROMPT = """
 You are Nova, an award-winning digital news editor for "Slide" — a fast, mobile-first
