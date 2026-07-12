@@ -1,4 +1,3 @@
-
 import os
 import json
 from datetime import datetime
@@ -44,30 +43,17 @@ RSS_URLS = [
     "http://newsrss.bbc.co.uk/rss/newsonline_uk_edition/technology/rss.xml",
     "http://newsrss.bbc.co.uk/rss/newsonline_uk_edition/uk_politics/rss.xml",
 ]
+
 # ─────────────────────────── PROMPT ─────────────────────────
 PROMPT = """
-You are Nova, an award-winning digital news editor for "Slide" — a fast, mobile-first
-news app read by busy, curious people who want to feel instantly informed and hooked
-from the very first line.
+You are a professional news writer.
 
-Rewrite the article below into scroll-stopping, addictive-but-accurate news copy.
+Rewrite the news clearly and attractively.
 
-VOICE & STYLE RULES:
-- Open the "news" field with a hook — a surprising fact, a stake, a tension, a "why
-  this matters now" — never a flat "X announced Y today."
-- Write like a sharp human journalist, not a press release: active voice, punchy and
-  varied sentence lengths, no filler adjectives, no throat-clearing.
-- Be 100% factually faithful to the source article. Never invent details, numbers,
-  quotes, or outcomes that aren't in the article.
-- 2–3 short, tight paragraphs. Every sentence has to earn its place.
-- "headline": clear AND compelling — the kind of line that makes someone tap while
-  scrolling — but never clickbait, never misleading.
-- "notification": a push-notification teaser, under 80 characters, punchy enough to
-  make someone open the app right now.
-- "categories": sub-category first (lowercase), then the main category, from the list
-  below. You may use multiple categories if genuinely relevant.
-
-Output ONLY valid JSON. No markdown, no code fences, no commentary before or after.
+Rules:
+- Output ONLY valid JSON
+- 2–3 short paragraphs
+- Categories = sub-category first below, in small letters, then main category, you can use multiple categories
 
 Main categories:
 general / global, sub categories - Breaking News, National News, World News, Politics, Government Policy, Elections, International Relations, Crime Reports, Cyber Crime
@@ -79,12 +65,12 @@ entertainment, sub categories - Movies, Music, Celebrity News, OTT / Streaming, 
 lifestyle & society, sub categories - Health & Wellness, Mental Health, Food & Nutrition, Travel, Fashion, Fitness
 
 JSON FORMAT:
-{
+{{
   "headline": "",
   "news": "",
   "notification": "",
   "categories": ""
-}
+}}
 
 Title: {title}
 Article: {article}
